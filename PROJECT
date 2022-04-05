@@ -1,0 +1,19 @@
+domain: a1tan
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: argocdsecretsynchronizer
+repo: github.com/a1tan/argocdsecretsynchronizer
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: a1tan
+  group: synchronizer
+  kind: SecretSynchronizer
+  path: github.com/a1tan/argocdsecretsynchronizer/api/v1alpha1
+  version: v1alpha1
+version: "3"

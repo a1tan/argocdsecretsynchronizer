@@ -1,0 +1,11 @@
+{
+    "go.gocodeAutoBuild": true,
+    // "go.useLanguageServer": false,
+    // "go.goroot": "/mnt/c/applinux/go",
+    "go.goroot": "/usr/local/go",
+    "go.inferGopath": false,
+    "go.toolsEnvVars": {
+        "GO111MODULE": "on"
+    },
+    // "go.gopath": "/mnt/c/Users/alaltund/Desktop/Work/Kubernetes/Operators/ArgoCDSecretSynchronizer"
+}
