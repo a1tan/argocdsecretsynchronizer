@@ -13,4 +13,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: a1tan/argocdsecretsynchronizer
-  newTag: 1.0.27
+  newTag: 1.0.37

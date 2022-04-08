@@ -116,11 +116,45 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 	secret := &corev1.Secret{}
 	err := r.Get(ctx, req.NamespacedName, secret)
 	if err != nil {
-		log.Error(err, "Failed to find secret")
+		log.Error(err, "Failed to find secret and started to delete related resources")
 		//TODO: Delete created secrets if prune
+		secretList := &corev1.SecretList{}
+
+		// sel := labels.NewSelector()
+		// req, err := labels.NewRequirement("argocdsecretsynchronizer", selection.Exists, []string{})
+		// if err != nil {
+		// 	log.Error(err, "Error while getting label selector")
+		// }
+		// sel.Add(*req)
+		opts := []client.ListOption{
+			client.HasLabels{"argocdsecretsynchronizer"}, //.MatchingLabelsSelector{Selector: sel},
+		}
+
+		err = r.List(ctx, secretList, opts...)
+		if err != nil {
+			log.Error(err, "There is an error while finding secrets and exiting reconcile")
+			return reconcile.Result{}, nil
+		}
+		log.Info("Argo CD secrets found", "Secrets", secretList)
+		for _, oRef := range secretList.Items {
+			mainSecret := &corev1.Secret{}
+			err = r.Get(ctx, types.NamespacedName{Name: oRef.Labels["argocdsecretsynchronizer"]}, mainSecret)
+			if err != nil {
+				//Double check before deleting
+				_, isSecretSynchronizerSecret := oRef.Labels["argocdsecretsynchronizer"]
+				if isSecretSynchronizerSecret {
+					err = r.Delete(ctx, &oRef)
+					if err != nil {
+						log.Error(err, "Cannot delete related secrets and exiting reconcile")
+						return reconcile.Result{}, nil
+					}
+				}
+			}
+		}
 		//Cancel reconcile since secret is deleted:
 		return reconcile.Result{}, nil
 	}
+
 	log.Info("Secret", "type", secret.Type, "name", secret.Name)
 	// var kubeconfig string
 	var kubeconfigByte []byte
@@ -208,7 +242,6 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 		// log.Info(argoSecretConfig)
 
 		argoConfigAsJson, _ := json.Marshal(argoConfig)
-		log.Info("Argo Config Created", "Config", string(argoConfigAsJson))
 
 		err = r.Create(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
@@ -410,7 +443,6 @@ func CreateServiceAccountWithToken(ctx context.Context, clientset kubernetes.Int
 			log.Error(err, "An error occurred while getting secret")
 			return nil, err
 		}
-		log.Info("Secret found", "Secret", secret)
 		if secret.Type == corev1.SecretTypeServiceAccountToken {
 			return secret, nil
 		}
