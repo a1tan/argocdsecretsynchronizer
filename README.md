@@ -12,3 +12,12 @@ These cluster managers are:
 * VCluster
 * Cluster API(Not tested yet)
 * Azure Service Operator(Not tested yet)
+
+## Installation
+* Clone this repository
+* Run below commands in order
+
+```
+kubectl apply -k config/default/
+kubectl apply -k config/samples/
+```

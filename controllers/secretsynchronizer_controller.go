@@ -56,7 +56,7 @@ type Result struct {
 }
 
 type ArgoConfig struct {
-	BearerToken     []byte        `json:"bearerToken"`
+	BearerToken     string        `json:"bearerToken"`
 	TlsClientConfig ArgoTlsConfig `json:"tlsClientConfig"`
 }
 
@@ -117,42 +117,7 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 	err := r.Get(ctx, req.NamespacedName, secret)
 	if err != nil {
 		log.Error(err, "Failed to find secret and started to delete related resources")
-		//TODO: Delete created secrets if prune
-		secretList := &corev1.SecretList{}
-
-		// sel := labels.NewSelector()
-		// req, err := labels.NewRequirement("argocdsecretsynchronizer", selection.Exists, []string{})
-		// if err != nil {
-		// 	log.Error(err, "Error while getting label selector")
-		// }
-		// sel.Add(*req)
-		opts := []client.ListOption{
-			client.HasLabels{"argocdsecretsynchronizer"}, //.MatchingLabelsSelector{Selector: sel},
-		}
-
-		err = r.List(ctx, secretList, opts...)
-		if err != nil {
-			log.Error(err, "There is an error while finding secrets and exiting reconcile")
-			return reconcile.Result{}, nil
-		}
-		log.Info("Argo CD secrets found", "Secrets", secretList)
-		for _, oRef := range secretList.Items {
-			mainSecret := &corev1.Secret{}
-			err = r.Get(ctx, types.NamespacedName{Name: oRef.Labels["argocdsecretsynchronizer"]}, mainSecret)
-			if err != nil {
-				//Double check before deleting
-				_, isSecretSynchronizerSecret := oRef.Labels["argocdsecretsynchronizer"]
-				if isSecretSynchronizerSecret {
-					err = r.Delete(ctx, &oRef)
-					if err != nil {
-						log.Error(err, "Cannot delete related secrets and exiting reconcile")
-						return reconcile.Result{}, nil
-					}
-				}
-			}
-		}
-		//Cancel reconcile since secret is deleted:
-		return reconcile.Result{}, nil
+		return r.DeleteIrrelevantSecrets(ctx)
 	}
 
 	log.Info("Secret", "type", secret.Type, "name", secret.Name)
@@ -167,10 +132,6 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 		kubeconfigByte, configExists = secret.Data["config"]
 	}
 	if configExists {
-
-		// log.Info("Secret", "object", secret, "data", secret.Data)
-		// kubeconfig = string(kubeconfigByte)
-		// endpoint, err := base64.StdEncoding.DecodeString(string(secret.Data["endpoint"]))
 		if err != nil {
 			log.Error(err, "Kubeconfig Decoding Error")
 			return ctrl.Result{}, err
@@ -181,33 +142,6 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 			log.Error(err, "Kubeconfig Json Convert Error")
 			return ctrl.Result{}, err
 		}
-		// log.Info("Kubeconfig cluster server", "Cluster Server", kubeconf.Clusters[0].Cluster.Server)
-		// if strings.Contains(kubeconf.Clusters[0].Cluster.Server, "localhost") {
-		// 	serviceList := &corev1.ServiceList{}
-		// 	listOpts := []client.ListOption{
-		// 		client.InNamespace(secret.Namespace),
-		// 	}
-		// 	err = r.List(ctx, serviceList, listOpts...)
-		// 	if err != nil {
-		// 		log.Error(err, "Service cannot found")
-		// 		return ctrl.Result{}, err
-		// 	}
-
-		// 	var selectedServiceName string
-		// 	for _, service := range serviceList.Items {
-		// 		if strings.Contains(service.Name, "headless") {
-		// 			selectedServiceName = service.Name
-		// 		}
-		// 	}
-		// 	kubeconf.Clusters[0].Cluster.Server = selectedServiceName
-		// 	log.Info("Kubeconfig cluster server after change", "Cluster Server", kubeconf.Clusters[0].Cluster.Server)
-		// 	kubeconfigByte, err = yaml.Marshal(kubeconf)
-		// 	if err != nil {
-		// 		log.Error(err, "Kube config yaml parse error")
-		// 		return ctrl.Result{}, err
-		// 	}
-		// 	log.Info("Kubeconfig after localhost change", "kubeconfig", string(kubeconfigByte))
-		// }
 
 		config, err := clientcmd.RESTConfigFromKubeConfig(kubeconfigByte)
 		if err != nil {
@@ -221,56 +155,20 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 			return ctrl.Result{}, err
 		}
 
-		argoSecret, err := CreateServiceAccountWithToken(ctx, clientset, "default", "managercluster")
+		argoSecret, err := CreateServiceAccountWithToken(ctx, clientset, "kube-system", "argocd-manager")
 		if err != nil {
 			log.Error(err, "Service account creation error")
 			return ctrl.Result{}, err
 		}
-
-		var argoTlsConfig ArgoTlsConfig
-		argoTlsConfig.Insecure = true
-		argoTlsConfig.CaData = argoSecret.Data["ca.crt"]
-
-		var argoConfig ArgoConfig
-		argoConfig.BearerToken = argoSecret.Data["token"]
-		argoConfig.TlsClientConfig = argoTlsConfig
-
-		// log.Info("Before Sync", "SA", string(argoSecret.Data["token"]))
-		// log.Info("Before Sync", "CA", string(argoSecret.Data["ca.crt"]))
-		// // argoSecretConfig := fmt.Sprintf("{\"bearerToken\": \"%s\",\"tlsClientConfig\": {\"insecure\": false,\"caData\": \"%s\"}}", string(argoSecret.Data["token"]), string(argoSecret.Data["ca.crt"]))
-		// argoSecretConfig := fmt.Sprintf("| \n {\"bearerToken\": \"%s\",\"tlsClientConfig\": {\"insecure\": true}}", string(argoSecret.Data["token"]))
-		// log.Info(argoSecretConfig)
-
-		argoConfigAsJson, _ := json.Marshal(argoConfig)
-
-		err = r.Create(ctx, &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      secret.Name + "-argocd",
-				Namespace: "argocd",
-				Labels: map[string]string{
-					"argocd.argoproj.io/secret-type": "cluster",
-					"argocdsecretsynchronizer":       secret.Name,
-				},
-			},
-			Type: corev1.SecretTypeOpaque,
-			Data: map[string][]byte{
-				"name":   []byte(kubeconf.Clusters[0].Name),
-				"server": []byte(kubeconf.Clusters[0].Cluster.Server),
-				"config": argoConfigAsJson,
-			},
-		})
+		err = r.CreateArgoCDSecret(ctx, argoSecret, secret, kubeconf)
 		if err != nil {
 			log.Error(err, "Argo CD secret creation error")
 			return ctrl.Result{}, err
 		}
 		log.Info("Argo CD Secret Created Successfully")
-		// // kubeClient, err := kubernetes.NewForConfig(kubeconfig)
-		// cfg, err := clientcmd.BuildConfigFromFlags(os.Getenv("MASTERURL"), os.Getenv("KUBECONFIG"))
-		// cfg.BearerToken = os.Getenv("BEARERTOKEN")
 	} else {
 		log.Info("Kubeconfig not found", "data", kubeconfigByte)
 	}
-	// TODO(user): your logic here
 
 	return ctrl.Result{}, nil
 }
@@ -340,16 +238,68 @@ func ignoreIrrelevantSecrets() predicate.Predicate {
 	}
 }
 
+func (r *SecretSynchronizerReconciler) CreateArgoCDSecret(ctx context.Context, argoSecret *corev1.Secret, secret *corev1.Secret, kubeconf kops.KubectlConfig) error {
+	var argoTlsConfig ArgoTlsConfig
+	argoTlsConfig.Insecure = false
+	argoTlsConfig.CaData = argoSecret.Data["ca.crt"]
+
+	var argoConfig ArgoConfig
+	argoConfig.BearerToken = string(argoSecret.Data["token"])
+	argoConfig.TlsClientConfig = argoTlsConfig
+
+	argoConfigAsJson, _ := json.Marshal(argoConfig)
+
+	err := r.Create(ctx, &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      secret.Name + "-argocd",
+			Namespace: "argocd",
+			Labels: map[string]string{
+				"argocd.argoproj.io/secret-type": "cluster",
+				"argocdsecretsynchronizer":       secret.Name,
+			},
+		},
+		Type: corev1.SecretTypeOpaque,
+		Data: map[string][]byte{
+			"name":   []byte(kubeconf.Clusters[0].Name),
+			"server": []byte(kubeconf.Clusters[0].Cluster.Server),
+			"config": argoConfigAsJson,
+		},
+	})
+	return err
+}
+
+func (r *SecretSynchronizerReconciler) DeleteIrrelevantSecrets(ctx context.Context) (ctrl.Result, error) {
+	log := ctrllog.FromContext(ctx)
+	secretList := &corev1.SecretList{}
+	opts := []client.ListOption{
+		client.HasLabels{"argocdsecretsynchronizer"},
+	}
+
+	err := r.List(ctx, secretList, opts...)
+	if err != nil {
+		log.Error(err, "There is an error while finding secrets and exiting reconcile")
+		return reconcile.Result{}, nil
+	}
+	for _, oRef := range secretList.Items {
+		mainSecret := &corev1.Secret{}
+		err := r.Get(ctx, types.NamespacedName{Name: oRef.Labels["argocdsecretsynchronizer"]}, mainSecret)
+		if err != nil {
+			//Double check before deleting
+			_, isSecretSynchronizerSecret := oRef.Labels["argocdsecretsynchronizer"]
+			if isSecretSynchronizerSecret {
+				err = r.Delete(ctx, &oRef)
+				if err != nil {
+					log.Error(err, "Cannot delete related secrets and exiting reconcile")
+					return reconcile.Result{}, nil
+				}
+			}
+		}
+	}
+	return reconcile.Result{}, nil
+}
 func CreateServiceAccountWithToken(ctx context.Context, clientset kubernetes.Interface, namespace string, name string) (*corev1.Secret, error) {
 	log := ctrllog.FromContext(ctx)
 	var err error
-	// serviceAccount, _ := clientset.CoreV1().ServiceAccounts(namespace).Get(context.Background(), name, metav1.GetOptions{})
-	// if serviceAccount == nil {
-	// 	serviceAccount, err = clientset.CoreV1().ServiceAccounts(namespace).Create(ctx, &corev1.ServiceAccount{ObjectMeta: metav1.ObjectMeta{Name: name}}, metav1.CreateOptions{})
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// }
 	clusterRole := rbacv1.ClusterRole{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "rbac.authorization.k8s.io/v1",
@@ -386,8 +336,7 @@ func CreateServiceAccountWithToken(ctx context.Context, clientset kubernetes.Int
 			Namespace: namespace,
 		}},
 	}
-	// binding, err := clientset.RbacV1().ClusterRoleBindings().Create(context.Background(), &roleBinding, metav1.CreateOptions{})
-	// log.Info("ClusterRoleBinding %s Created", binding.Name)
+
 	_, err = clientset.RbacV1().ClusterRoleBindings().Create(context.Background(), &roleBinding, metav1.CreateOptions{})
 	if err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
@@ -411,29 +360,7 @@ func CreateServiceAccountWithToken(ctx context.Context, clientset kubernetes.Int
 			return nil, err
 		}
 	}
-	// token, err := clientset.CoreV1().Secrets(namespace).Create(ctx, &corev1.Secret{
-	// 	ObjectMeta: metav1.ObjectMeta{
-	// 		Name: tokenName,
-	// 		Annotations: map[string]string{
-	// 			corev1.ServiceAccountNameKey: sa.Name,
-	// 			corev1.ServiceAccountUIDKey:  string(sa.UID),
-	// 		},
-	// 	}, Type: corev1.SecretTypeServiceAccountToken,
-	// },
-	// 	metav1.CreateOptions{})
-	// if err != nil {
-	// 	// log.Error(err, "Target cluster service account token creation error")
-	// 	return "", err
-	// }
-	// sa.Secrets = []corev1.ObjectReference{{Name: token.Name}}
 
-	// Scan all secrets looking for one of the correct type:
-
-	// serviceAccount, err := clientset.CoreV1().ServiceAccounts(namespace).Create(ctx, sa, metav1.CreateOptions{})
-	// if err != nil {
-	// 	// log.Error(err, "Target cluster service account creation error")
-	// 	return nil, err
-	// }
 	serviceAccountCreated, _ := clientset.CoreV1().ServiceAccounts(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	log.Info("Service Account Created", "Service Account", serviceAccountCreated)
 
