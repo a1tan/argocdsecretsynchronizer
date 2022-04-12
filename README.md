@@ -21,3 +21,15 @@ These cluster managers are:
 kubectl apply -k config/default/
 kubectl apply -k config/samples/
 ```
+
+## Tips
+### VCluster
+When using with VCluster, VCluster uses localhost as the kubeconfig server which cannot be used to connect created cluster.
+To solve this problem below two parameters has to be set. These parameters point to the service created on the VCluster namespace.
+
+```
+syncer:
+  extraArgs: 
+    - out-kube-config-server: https://{{service}}.{{namespace}}.svc.cluster.local
+    - tls-san: {{service}}.{{namespace}}.svc.cluster.local
+```
