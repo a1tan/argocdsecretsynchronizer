@@ -3,7 +3,7 @@ This tool is an experimental operator to synchronize secrets between declarative
 
 This operator does a simple thing: 
 * Takes the secrets produced when a cluster added
-* Uses the kubeconfig on that secret to create service account, role and rolebinding on that cluster 
+* Uses the kubeconfig on that secret to create service account, role and rolebinding on created cluster 
 * Takes the token of the service account created
 * Creates the related Argo CD Cluster definition which is also another secret
 
