@@ -25,7 +25,7 @@ kubectl apply -k config/samples/
 ## Tips
 ### VCluster
 When using with VCluster, VCluster uses localhost as the kubeconfig server which cannot be used to connect created cluster.
-To solve this problem below two parameters has to be set. These parameters point to the service created on the VCluster namespace.
+To solve this problem below two parameters has to be set. These parameters point to the service created on the VCluster namespace on parent cluster.
 
 ```
 syncer:
