@@ -1,0 +1,485 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+warning: GOPATH set to GOROOT (/home/alaltund/applinux/go) has no effect
+
+# GNU Make 4.2.1
+# Built for x86_64-pc-linux-gnu
+# Copyright (C) 1988-2016 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Fri Jul 29 12:54:31 2022
+
+# Variables
+
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# environment
+WSLENV = VSCODE_WSL_EXT_LOCATION/up:VSCODE_SERVER_TAR/up
+# makefile (from 'Makefile', line 54)
+.SHELLFLAGS = -ec
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# makefile (from 'Makefile', line 155)
+PROJECT_DIR := /mnt/c/Users/alaltund/Desktop/Work/Kubernetes/Operators/ArgoCDSecretSynchronizer
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# automatic
+@F = $(notdir $@)
+# makefile
+CURDIR := /mnt/c/Users/alaltund/Desktop/Work/Kubernetes/Operators/ArgoCDSecretSynchronizer
+# makefile (from 'Makefile', line 53)
+SHELL = /usr/bin/env bash -o pipefail
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en","availableLanguages":{}}
+# environment
+_ = /home/alaltund/.vscode-server/bin/3b889b090b5ad5793f524b5d1d39fda662b96a2a/node
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST :=  Makefile
+# makefile (from 'Makefile', line 184)
+OPM = ./bin/opm
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+XDG_DATA_DIRS = /usr/local/share:/usr/share:/var/lib/snapd/desktop
+# makefile (from 'Makefile', line 6)
+VERSION = 0.0.1
+# environment
+LESSOPEN = | /usr/bin/lesspipe %s
+# environment
+VSCODE_CWD = /mnt/c/Users/alaltund/AppData/Local/Programs/Microsoft VS Code
+# makefile (from 'Makefile', line 156)
+go-get-tool = @[ -f $(1) ] || { set -e ; TMP_DIR=$$(mktemp -d) ; cd $$TMP_DIR ; go mod init tmp ; echo "Downloading $(2)" ; GOBIN=$(PROJECT_DIR)/bin go get $(2) ; rm -rf $$TMP_DIR ; }
+# default
+MAKE_HOST := x86_64-pc-linux-gnu
+# environment
+PATH = /home/alaltund/.vscode-server/bin/3b889b090b5ad5793f524b5d1d39fda662b96a2a/bin/remote-cli:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/Common Files/Oracle/Java/javapath:/mnt/c/Program Files (x86)/Microsoft SDKs/Azdata/CLI/wbin:/mnt/c/Program Files (x86)/Microsoft SDKs/VSTS/CLI/wbin:/mnt/c/Program Files (x86)/Microsoft SDKs/Azure/CLI2/wbin:/mnt/c/Program Files/Common Files/Microsoft Shared/Microsoft Online Services:/mnt/c/Program Files (x86)/Common Files/Microsoft Shared/Microsoft Online Services:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/ProgramData/chocolatey/bin:/mnt/c/Program Files/Microsoft SQL Server/Client SDK/ODBC/170/Tools/Binn/:/mnt/c/Program Files/Git/cmd:/mnt/c/Git/Subrepo/lib:/mnt/c/nuget:/mnt/c/Program Files/Intel/WiFi/bin/:/mnt/c/Program Files/Common Files/Intel/WirelessCommon/:/mnt/c/Program Files/OpenSSL-Win64/bin:/mnt/c/istio/bin:/mnt/c/Terraform:/mnt/c/kubectx:/mnt/c/Program Files (x86)/Yarn/bin/:/mnt/c/Docfx:/mnt/c/Java/maven/bin:/mnt/c/Java/jdk-13.0.2/bin:/mnt/c/Users/alaltund/Desktop/Work/Oracle/instantclient_19_8:/mnt/c/Program Files (x86)/Microsoft SQL Server/140/DTS/Binn/:/mnt/c/Program Files/nodejs/:/mnt/c/Users/alaltund/AppData/Local/Programs/Python/Python39:/mnt/c/Users/alaltund/AppData/Local/Programs/Python/Python39/Scripts:/mnt/c/Openshift:/mnt/c/Users/alaltund/AppData/Roaming/npm:/mnt/c/krustlet:/mnt/c/Path:/mnt/c/Program Files (x86)/Pulse Secure/VC142.CRT/X64/:/mnt/c/Program Files (x86)/Pulse Secure/VC142.CRT/X86/:/mnt/c/Program Files/Microsoft/Azure Functions Core Tools/:/mnt/c/Program Files/Go/bin:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files/Microsoft SQL Server/150/Tools/Binn/:/mnt/c/Program Files/Docker/Docker/resources/bin:/mnt/c/ProgramData/DockerDesktop/version-bin:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/PuTTY/:/mnt/c/Users/alaltund/scoop/shims:/mnt/c/Users/alaltund/.windows-build-tools/python27/:/mnt/c/Program Files/nodejs/node_modules/npm/node_modules/npm-lifecycle/node-gyp-bin:/mnt/c/Users/alaltund/AppData/Roaming/npm/node_modules/windows-build-tools/node_modules/.bin:/mnt/c/Users/alaltund/AppData/Roaming/npm/node_modules/.bin:/mnt/c/ProgramData/DockerDesktop/version-bin:/mnt/c/Program Files/Docker/Docker/Resources/bin:/mnt/c/Program Files (x86)/Microsoft SDKs/Azure/CLI2/wbin:/mnt/c/Program Files/Common Files/Microsoft Shared/Microsoft Online Services:/mnt/c/Program Files (x86)/Common Files/Microsoft Shared/Microsoft Online Services:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files/Microsoft SQL Server/130/Tools/Binn/:/mnt/c/Program Files/nodejs/:/mnt/c/ProgramData/chocolatey/bin:/mnt/c/Program Files/Microsoft SQL Server/Client SDK/ODBC/170/Tools/Binn/:/mnt/c/Path:/mnt/c/ksonnet:/mnt/c/Program Files/Git/cmd:/mnt/c/Git/Subrepo/lib:/mnt/c/Git/Subrepo:/mnt/c/nuget:/mnt/c/Pro:/mnt/c/Users/alaltund/.dotnet/tools:/mnt/c/Users/alaltund/go/bin:/mnt/c/Users/alaltund/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/alaltund/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/c/Users/alaltund/.dotnet/tools:/mnt/c/Users/alaltund/AppData/Local/Programs/Rancher Desktop/resources/resources/win32/bin:/mnt/c/Users/alaltund/AppData/Local/Programs/Rancher Desktop/resources/resources/linux/bin:/mnt/c/Users/alaltund/.dotnet/tools:/snap/bin:/home/alaltund/.dotnet:/home/alaltund/.dotnet/tools:/home/alaltund/applinux:/home/alaltund/applinux/go/bin
+# environment
+XDG_RUNTIME_DIR = /mnt/wslg/runtime-dir
+# environment
+GOPATH = /home/alaltund/applinux/go
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-fb6fa142-64ad-42cb-a20c-f5715b07c6bb.sock
+# environment
+KUBECONFIG = /mnt/c/Users/alaltund/.kube/config
+# environment
+VSCODE_SERVER_TAR = /mnt/c/Users/alaltund/AppData/Local/Temp/vscode-remote-wsl/3b889b090b5ad5793f524b5d1d39fda662b96a2a/vscode-server-stable-linux-x64.tar.gz
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
+# makefile (from 'Makefile', line 139)
+CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
+# environment
+LS_COLORS = rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+# makefile (from 'Makefile', line 205)
+CATALOG_IMG = $(IMAGE_TAG_BASE)-catalog:v$(VERSION)
+# automatic
+%F = $(notdir $%)
+# makefile (from 'Makefile', line 45)
+GOBIN = $(shell go env GOPATH)/bin
+# environment
+DISPLAY = :0
+# makefile (from 'Makefile', line 202)
+BUNDLE_IMGS = $(BUNDLE_IMG)
+# environment
+PWD = /mnt/c/Users/alaltund/Desktop/Work/Kubernetes/Operators/ArgoCDSecretSynchronizer
+# environment
+DOTNET_ROOT = /home/alaltund/.dotnet
+# default
+.LOADED := 
+# environment
+WSL_INTEROP = /run/WSL/443_interop
+# environment
+PULSE_SERVER = /mnt/wslg/PulseServer
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/alaltund
+# environment
+LESSCLOSE = /usr/bin/lesspipe %s %s
+# environment
+LOGNAME = alaltund
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+SHLVL = 0
+# default
+MAKE_VERSION := 4.2.1
+# environment
+USER = alaltund
+# makefile
+.DEFAULT_GOAL := all
+# environment
+GOROOT = /home/alaltund/applinux/go
+# environment
+NAME = ALALTUND0009
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+VSCODE_WSL_EXT_LOCATION = /mnt/c/Users/alaltund/.vscode/extensions/ms-vscode-remote.remote-wsl-0.66.3
+# default
+MAKE_COMMAND := make
+# makefile (from 'Makefile', line 144)
+KUSTOMIZE = $(shell pwd)/bin/kustomize
+# default
+.VARIABLES := 
+# automatic
+*F = $(notdir $*)
+# makefile (from 'Makefile', line 39)
+IMG = a1tan/argocdsecretsynchronizer:0.0.13
+# makefile (from 'Makefile', line 25)
+BUNDLE_METADATA_OPTS = $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
+# makefile
+MAKEFLAGS = pqrR
+# environment
+MFLAGS = -pqrR
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# automatic
++F = $(notdir $+)
+# makefile (from 'Makefile', line 149)
+ENVTEST = $(shell pwd)/bin/setup-envtest
+# environment
+VSCODE_HANDLES_SIGPIPE = true
+# 'override' directive
+.SHELLSTATUS := 1
+# default
+MAKEFILES := 
+# automatic
+<F = $(notdir $<)
+# makefile (from 'Makefile', line 36)
+BUNDLE_IMG = $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
+# environment
+LC_ALL = C
+# environment
+HOSTTYPE = x86_64
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# environment
+WAYLAND_DISPLAY = wayland-0
+# default
+.INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
+# makefile (from 'Makefile', line 32)
+IMAGE_TAG_BASE = a1tan/argocdsecretsynchronizer
+# default
+.RECIPEPREFIX := 
+# makefile (from 'Makefile', line 119)
+ignore-not-found = false
+# environment
+LANG = C
+# environment
+TERM = xterm-256color
+# makefile (from 'Makefile', line 41)
+ENVTEST_K8S_VERSION = 1.22
+# environment
+WSL_DISTRO_NAME = Ubuntu-20.04
+# variable set hash-table stats:
+# Load=89/1024=9%, Rehash=0, Collisions=4/150=3%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 115, inode 183803159792201521): 21 files, no impossibilities.
+
+# 21 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+envtest:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 152):
+	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
+
+all: build
+#  Phony target (prerequisite of .PHONY).
+#  Command line target.
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/10=0%
+
+catalog-push:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 222):
+	$(MAKE) docker-push IMG=$(CATALOG_IMG)
+
+docker-build: test
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 110):
+	docker build -t ${IMG} .
+
+.PHONY: all help manifests generate fmt vet test build run docker-build docker-push install uninstall deploy undeploy controller-gen kustomize envtest bundle bundle-build bundle-push opm catalog-build catalog-push
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+opm:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 188):
+	@{ \
+	set -e ;\
+	mkdir -p $(dir $(OPM)) ;\
+	OS=$(shell go env GOOS) && ARCH=$(shell go env GOARCH) && \
+	curl -sSLo $(OPM) https://github.com/operator-framework/operator-registry/releases/download/v1.19.1/$${OS}-$${ARCH}-opm ;\
+	chmod +x $(OPM) ;\
+	}
+
+bundle: manifests kustomize
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 170):
+	operator-sdk generate kustomize manifests -q
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
+	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
+	operator-sdk bundle validate ./bundle
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+ 
+#  File has not been updated.
+
+uninstall: manifests kustomize
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 128):
+	$(KUSTOMIZE) build config/crd | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-04-11 23:31:46.589941
+#  File has been updated.
+#  Successfully updated.
+
+test: manifests generate fmt vet envtest
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 96):
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -coverprofile cover.out
+
+bundle-push:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 181):
+	$(MAKE) docker-push IMG=$(BUNDLE_IMG)
+
+catalog-build: opm
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 217):
+	$(OPM) index add --container-tool docker --mode semver --tag $(CATALOG_IMG) --bundles $(BUNDLE_IMGS) $(FROM_INDEX_OPT)
+
+build: generate fmt vet
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/10=0%
+#  recipe to execute (from 'Makefile', line 102):
+	go build -o bin/manager main.go
+
+vet:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 92):
+	go vet ./...
+
+help:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 74):
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+
+kustomize:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 147):
+	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v3@v3.8.7)
+
+generate: controller-gen
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/10=0%
+#  recipe to execute (from 'Makefile', line 84):
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+undeploy:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 137):
+	$(KUSTOMIZE) build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
+
+manifests: controller-gen
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 80):
+	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+run: manifests generate fmt vet
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 106):
+	go run ./main.go
+
+bundle-build:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 177):
+	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
+
+fmt:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 88):
+	go fmt ./...
+
+deploy: manifests kustomize
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 132):
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/default | kubectl apply -f -
+
+# 'override' directive
+controller-gen: .SHELLSTATUS := 0
+controller-gen:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := controller-gen
+# automatic
+# % := 
+# automatic
+# * := 
+# automatic
+# + := 
+# automatic
+# | := 
+# automatic
+# < := 
+# automatic
+# ^ := 
+# automatic
+# ? := 
+# variable set hash-table stats:
+# Load=9/32=28%, Rehash=0, Collisions=4/19=21%
+#  recipe to execute (from 'Makefile', line 142):
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.7.0)
+
+docker-push:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 114):
+	docker push ${IMG}
+
+install: manifests kustomize
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 124):
+	$(KUSTOMIZE) build config/crd | kubectl apply -f -
+
+# files hash-table stats:
+# Load=28/1024=3%, Rehash=0, Collisions=6/135=4%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 50 / storage = 442 B / avg = 8 B
+# current buf: size = 8162 B / used = 442 B / count = 50 / avg = 8 B
+
+# strcache performance: lookups = 176 / hit rate = 71%
+# hash-table stats:
+# Load=50/8192=1%, Rehash=0, Collisions=4/176=2%
+# Finished Make data base on Fri Jul 29 12:54:31 2022
+
+ 

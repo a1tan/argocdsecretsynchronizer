@@ -1,0 +1,13 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/mnt/c/Users/alaltund/Desktop/Work/Kubernetes/Operators/ArgoCDSecretSynchronizer'
+ 
+warning: GOPATH set to GOROOT (/home/alaltund/applinux/go) has no effect
+
+[ -f /mnt/c/Users/alaltund/Desktop/Work/Kubernetes/Operators/ArgoCDSecretSynchronizer/bin/controller-gen ] || { set -e ; TMP_DIR=$(mktemp -d) ; cd $TMP_DIR ; go mod init tmp ; echo "Downloading sigs.k8s.io/controller-tools/cmd/controller-gen@v0.7.0" ; GOBIN=/mnt/c/Users/alaltund/Desktop/Work/Kubernetes/Operators/ArgoCDSecretSynchronizer/bin go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.7.0 ; rm -rf $TMP_DIR ; }
+ 
+/mnt/c/Users/alaltund/Desktop/Work/Kubernetes/Operators/ArgoCDSecretSynchronizer/bin/controller-gen object:headerFile="hack/boilerplate.go.txt" paths="./..."
+go fmt ./...
+go vet ./...
+go build -o bin/manager main.go
+make: Leaving directory '/mnt/c/Users/alaltund/Desktop/Work/Kubernetes/Operators/ArgoCDSecretSynchronizer'
+ 

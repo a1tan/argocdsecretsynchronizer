@@ -126,9 +126,8 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 	var configExists bool
 	var kubeconf kops.KubectlConfig
 
-	if secret.Type == "connection.crossplane.io/v1alpha1" {
-		kubeconfigByte, configExists = secret.Data["kubeconfig"]
-	} else if secret.Type == "Opaque" {
+	kubeconfigByte, configExists = secret.Data["kubeconfig"]
+	if !configExists {
 		kubeconfigByte, configExists = secret.Data["config"]
 	}
 	if configExists {
