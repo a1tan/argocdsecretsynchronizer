@@ -1,6 +1,4 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-warning: GOPATH set to GOROOT (/home/alaltund/applinux/go) has no effect
-
 # GNU Make 4.2.1
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2016 Free Software Foundation, Inc.
@@ -8,7 +6,7 @@ warning: GOPATH set to GOROOT (/home/alaltund/applinux/go) has no effect
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Jul 29 12:54:31 2022
+# Make data base, printed on Sun Jul 31 15:41:38 2022
 
 # Variables
 
@@ -17,7 +15,7 @@ warning: GOPATH set to GOROOT (/home/alaltund/applinux/go) has no effect
 # automatic
 ?F = $(notdir $?)
 # environment
-WSLENV = VSCODE_WSL_EXT_LOCATION/up:VSCODE_SERVER_TAR/up
+WSLENV = VSCODE_WSL_EXT_LOCATION/up
 # makefile (from 'Makefile', line 54)
 .SHELLFLAGS = -ec
 # automatic
@@ -44,12 +42,16 @@ OPM = ./bin/opm
 GNUMAKEFLAGS := 
 # environment
 XDG_DATA_DIRS = /usr/local/share:/usr/share:/var/lib/snapd/desktop
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # makefile (from 'Makefile', line 6)
 VERSION = 0.0.1
 # environment
 LESSOPEN = | /usr/bin/lesspipe %s
 # environment
 VSCODE_CWD = /mnt/c/Users/alaltund/AppData/Local/Programs/Microsoft VS Code
+# environment
+GOPROXY = https://proxy.golang.org,direct
 # makefile (from 'Makefile', line 156)
 go-get-tool = @[ -f $(1) ] || { set -e ; TMP_DIR=$$(mktemp -d) ; cd $$TMP_DIR ; go mod init tmp ; echo "Downloading $(2)" ; GOBIN=$(PROJECT_DIR)/bin go get $(2) ; rm -rf $$TMP_DIR ; }
 # default
@@ -59,15 +61,13 @@ PATH = /home/alaltund/.vscode-server/bin/3b889b090b5ad5793f524b5d1d39fda662b96a2
 # environment
 XDG_RUNTIME_DIR = /mnt/wslg/runtime-dir
 # environment
-GOPATH = /home/alaltund/applinux/go
+GOPATH = /home/alaltund/go
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-fb6fa142-64ad-42cb-a20c-f5715b07c6bb.sock
+VSCODE_IPC_HOOK_CLI = /mnt/wslg/runtime-dir/vscode-ipc-7c5bade5-9a22-4a02-8f8d-0c87bac36b64.sock
 # environment
 KUBECONFIG = /mnt/c/Users/alaltund/.kube/config
-# environment
-VSCODE_SERVER_TAR = /mnt/c/Users/alaltund/AppData/Local/Temp/vscode-remote-wsl/3b889b090b5ad5793f524b5d1d39fda662b96a2a/vscode-server-stable-linux-x64.tar.gz
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver output-sync check-symlink load
 # makefile (from 'Makefile', line 139)
@@ -91,11 +91,11 @@ DOTNET_ROOT = /home/alaltund/.dotnet
 # default
 .LOADED := 
 # environment
-WSL_INTEROP = /run/WSL/443_interop
+WSL_INTEROP = /run/WSL/5216_interop
 # environment
 PULSE_SERVER = /mnt/wslg/PulseServer
 # environment
-VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+GOMODCACHE = /home/alaltund/go/pkg/mod
 # environment
 HOME = /home/alaltund
 # environment
@@ -139,7 +139,7 @@ KUSTOMIZE = $(shell pwd)/bin/kustomize
 # automatic
 *F = $(notdir $*)
 # makefile (from 'Makefile', line 39)
-IMG = a1tan/argocdsecretsynchronizer:0.0.13
+IMG = a1tan/argocdsecretsynchronizer:0.0.14
 # makefile (from 'Makefile', line 25)
 BUNDLE_METADATA_OPTS = $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 # makefile
@@ -190,8 +190,10 @@ TERM = xterm-256color
 ENVTEST_K8S_VERSION = 1.22
 # environment
 WSL_DISTRO_NAME = Ubuntu-20.04
+# environment
+MOTD_SHOWN = update-motd
 # variable set hash-table stats:
-# Load=89/1024=9%, Rehash=0, Collisions=4/150=3%
+# Load=91/1024=9%, Rehash=0, Collisions=5/152=3%
 
 # Pattern-specific Variable Values
 
@@ -199,9 +201,9 @@ WSL_DISTRO_NAME = Ubuntu-20.04
 
 # Directories
 
-# . (device 115, inode 183803159792201521): 21 files, no impossibilities.
+# . (device 115, inode 183803159792201521): 22 files, no impossibilities.
 
-# 21 files, no impossibilities in 1 directories.
+# 22 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -261,6 +263,7 @@ opm:
 	curl -sSLo $(OPM) https://github.com/operator-framework/operator-registry/releases/download/v1.19.1/$${OS}-$${ARCH}-opm ;\
 	chmod +x $(OPM) ;\
 	}
+ 
 
 bundle: manifests kustomize
 #  Phony target (prerequisite of .PHONY).
@@ -277,7 +280,6 @@ bundle: manifests kustomize
 .SUFFIXES:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
- 
 #  File has not been updated.
 
 uninstall: manifests kustomize
@@ -291,7 +293,7 @@ uninstall: manifests kustomize
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-04-11 23:31:46.589941
+#  Last modified 2022-07-31 11:54:16.9864517
 #  File has been updated.
 #  Successfully updated.
 
@@ -474,12 +476,12 @@ install: manifests kustomize
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 50 / storage = 442 B / avg = 8 B
-# current buf: size = 8162 B / used = 442 B / count = 50 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 51 / storage = 461 B / avg = 9 B
+# current buf: size = 8162 B / used = 461 B / count = 51 / avg = 9 B
 
-# strcache performance: lookups = 176 / hit rate = 71%
+# strcache performance: lookups = 177 / hit rate = 71%
 # hash-table stats:
-# Load=50/8192=1%, Rehash=0, Collisions=4/176=2%
-# Finished Make data base on Fri Jul 29 12:54:31 2022
+# Load=51/8192=1%, Rehash=0, Collisions=4/177=2%
+# Finished Make data base on Sun Jul 31 15:41:38 2022
 
  

@@ -363,6 +363,29 @@ func CreateServiceAccountWithToken(ctx context.Context, clientset kubernetes.Int
 	serviceAccountCreated, _ := clientset.CoreV1().ServiceAccounts(namespace).Get(context.Background(), name, metav1.GetOptions{})
 	log.Info("Service Account Created", "Service Account", serviceAccountCreated)
 
+	if serviceAccountCreated.Secrets == nil {
+		secretToCreate := corev1.Secret{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "Secret",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        name,
+				Namespace:   namespace,
+				Annotations: map[string]string{"kubernetes.io/service-account.name": serviceAccountCreated.Name},
+			},
+			Type: corev1.SecretTypeServiceAccountToken,
+		}
+
+		secret, err := clientset.CoreV1().Secrets(namespace).Create(context.Background(), &secretToCreate, metav1.CreateOptions{})
+
+		if err != nil {
+			log.Error(err, "An error occurred while creating secret")
+			return nil, err
+		}
+		return secret, nil
+	}
+
 	for _, oRef := range serviceAccountCreated.Secrets {
 		secret, err := clientset.CoreV1().Secrets(namespace).Get(context.Background(), oRef.Name, metav1.GetOptions{})
 		if err != nil {
