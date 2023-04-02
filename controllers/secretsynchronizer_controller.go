@@ -19,17 +19,20 @@ package controllers
 import (
 	"context"
 	"encoding/json"
-	"strings"
 
 	synchronizerv1alpha1 "github.com/a1tan/argocdsecretsynchronizer/api/v1alpha1"
 	"github.com/go-logr/logr"
+	"github.com/prometheus/common/log"
 	"gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	kops "k8s.io/kops/pkg/kubeconfig"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -99,20 +102,39 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// log := r.Log.WithValues("SecretSynchronizer", req.NamespacedName)
 	log := ctrllog.FromContext(ctx)
 	log.Info("Reconcile method has started")
-	// synchronizer := &synchronizerv1alpha1.SecretSynchronizer{}
-	// err := r.Get(ctx, req.NamespacedName, synchronizer)
+
+	// cfg, err := rest.InClusterConfig()
 	// if err != nil {
-	// 	if errors.IsNotFound(err) {
-	// 		// Request object not found, could have been deleted after reconcile request.
-	// 		// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-	// 		// Return and don't requeue
-	// 		log.Info("Synchronizer resource not found. Ignoring since object must be deleted")
+	// 	log.Error(err, "Failed to get Kubernetes config")
+	// 	return ctrl.Result{}, nil
+	// }
+
+	// scheme := runtime.NewScheme()
+	// _ = synchronizerv1alpha1.AddToScheme(scheme)
+	// crtClient, err := client.New(cfg, client.Options{Scheme: scheme})
+	// if err != nil {
+	// 	log.Error(err, "Failed to create controller-runtime client")
+	// 	return ctrl.Result{}, nil
+	// }
+
+	// selector := labels.Set{"app": "secretsynchronizer"}.AsSelector()
+
+	// syncList := &synchronizerv1alpha1.SecretSynchronizerList{}
+	// if err := crtClient.List(ctx, syncList, client.MatchingLabelsSelector{Selector: selector}); err != nil {
+	// 	if !errors.IsNotFound(err) {
+	// 		log.Error(err, "Failed to list SecretSynchronizer objects")
 	// 		return ctrl.Result{}, nil
 	// 	}
-	// 	// Error reading the object - requeue the request.
-	// 	log.Error(err, "Failed to get Synchronizer")
-	// 	return ctrl.Result{}, err
 	// }
+	// var synchronizer synchronizerv1alpha1.SecretSynchronizer
+	// if len(syncList.Items) > 0 {
+	// 	synchronizer = syncList.Items[0]
+	// } else {
+	// 	return ctrl.Result{}, nil
+	// }
+
+	var synchronizer synchronizerv1alpha1.SecretSynchronizer = *GetSecretSynchronizer(ctx)
+
 	secret := &corev1.Secret{}
 	err := r.Get(ctx, req.NamespacedName, secret)
 	if err != nil {
@@ -120,8 +142,6 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return r.DeleteIrrelevantSecrets(ctx)
 	}
 
-	log.Info("Secret", "type", secret.Type, "name", secret.Name)
-	// var kubeconfig string
 	var kubeconfigByte []byte
 	var configExists bool
 	var kubeconf kops.KubectlConfig
@@ -129,6 +149,9 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 	kubeconfigByte, configExists = secret.Data["kubeconfig"]
 	if !configExists {
 		kubeconfigByte, configExists = secret.Data["config"]
+		if !configExists {
+			kubeconfigByte, configExists = secret.Data["value"]
+		}
 	}
 	if configExists {
 		if err != nil {
@@ -159,12 +182,11 @@ func (r *SecretSynchronizerReconciler) Reconcile(ctx context.Context, req ctrl.R
 			log.Error(err, "Service account creation error")
 			return ctrl.Result{}, err
 		}
-		err = r.CreateArgoCDSecret(ctx, argoSecret, secret, kubeconf)
+		err = r.CreateArgoCDSecret(ctx, argoSecret, secret, kubeconf, &synchronizer)
 		if err != nil {
 			log.Error(err, "Argo CD secret creation error")
 			return ctrl.Result{}, err
 		}
-		log.Info("Argo CD Secret Created Successfully")
 	} else {
 		log.Info("Kubeconfig not found", "data", kubeconfigByte)
 	}
@@ -191,17 +213,17 @@ func (r *SecretSynchronizerReconciler) SetupWithManager(mgr ctrl.Manager) error 
 						setupLog.Info("Secret already is an ArgoCD secret")
 						return nil
 					}
-					_, configExists := secret.Data["config"]
-					_, kubeconfigExists := secret.Data["kubeconfig"]
-					if configExists || kubeconfigExists {
-						return []reconcile.Request{
-							{NamespacedName: types.NamespacedName{
-								Name:      secret.GetName(),
-								Namespace: secret.GetNamespace(),
-							}},
-						}
+					// _, configExists := secret.Data["config"]
+					// _, kubeconfigExists := secret.Data["kubeconfig"]
+					// if configExists || kubeconfigExists {
+					return []reconcile.Request{
+						{NamespacedName: types.NamespacedName{
+							Name:      secret.GetName(),
+							Namespace: secret.GetNamespace(),
+						}},
 					}
-					return nil
+					// }
+					// return nil
 				},
 			),
 		).
@@ -211,14 +233,14 @@ func (r *SecretSynchronizerReconciler) SetupWithManager(mgr ctrl.Manager) error 
 func ignoreIrrelevantSecrets() predicate.Predicate {
 	return predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
+			var ok bool
 			secret, ok := e.ObjectNew.(*corev1.Secret)
 			if !ok {
 				setupLog.Info("Unable to get secret", "secret", secret, "object", e.ObjectNew)
 				return false
 			}
-			_, configExists := secret.Data["config"]
-			_, kubeconfigExists := secret.Data["kubeconfig"]
-			return configExists || kubeconfigExists
+			setupLog.Info("Validating secret")
+			return isValidKubeconfig(secret.Data)
 		},
 		CreateFunc: func(e event.CreateEvent) bool {
 			secret, ok := e.Object.(*corev1.Secret)
@@ -226,9 +248,8 @@ func ignoreIrrelevantSecrets() predicate.Predicate {
 				setupLog.Info("Unable to get secret", "secret", secret, "object", e.Object)
 				return false
 			}
-			_, configExists := secret.Data["config"]
-			_, kubeconfigExists := secret.Data["kubeconfig"]
-			return configExists || kubeconfigExists
+			setupLog.Info("Validating secret")
+			return isValidKubeconfig(secret.Data)
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
 			// Evaluates to false if the object has been confirmed deleted.
@@ -237,7 +258,84 @@ func ignoreIrrelevantSecrets() predicate.Predicate {
 	}
 }
 
-func (r *SecretSynchronizerReconciler) CreateArgoCDSecret(ctx context.Context, argoSecret *corev1.Secret, secret *corev1.Secret, kubeconf kops.KubectlConfig) error {
+func isValidKubeconfig(secretData map[string][]byte) bool {
+	var ok bool
+
+	var kubeconfigData []byte
+	var kubeconf kops.KubectlConfig
+	var synchronizer synchronizerv1alpha1.SecretSynchronizer = *GetSecretSynchronizer(ctx)
+	// setupLog.Info("Validating secret", "secretData", secretData)
+	if kubeconfigData, ok = secretData["kubeconfig"]; !ok {
+		if kubeconfigData, ok = secretData["config"]; !ok {
+			if kubeconfigData, ok = secretData["value"]; !ok {
+				setupLog.Info("Cannot find kubeconfig in secret")
+				return false
+			}
+		}
+	}
+
+	err := yaml.Unmarshal(kubeconfigData, &kubeconf)
+	if err != nil {
+		return false
+	}
+
+	_, err = clientcmd.RESTConfigFromKubeConfig(kubeconfigData)
+	if err != nil {
+		return false
+	}
+
+	// kubeconfig, err := base64.StdEncoding.DecodeString(string(kubeconfigData))
+	// if err != nil {
+	// 	setupLog.Info("Cannot decode kubeconfig", "kubeconfigData", kubeconfigData, "error", err)
+	// 	return false
+	// }
+
+	// config, err := clientcmd.Load(kubeconfig)
+	// if err != nil {
+	// 	setupLog.Info("Cannot load kubeconfig")
+	// 	return false
+	// }
+
+	// if len(config.Contexts) == 0 || len(config.Clusters) == 0 {
+	// 	setupLog.Info("Kubeconfig is empty")
+	// 	return false
+	// }
+
+	return true
+}
+func GetSecretSynchronizer(ctx context.Context) *synchronizerv1alpha1.SecretSynchronizer {
+	cfg, err := rest.InClusterConfig()
+	if err != nil {
+		log.Error(err, "Failed to get Kubernetes config")
+		return nil
+	}
+
+	scheme := runtime.NewScheme()
+	_ = synchronizerv1alpha1.AddToScheme(scheme)
+	crtClient, err := client.New(cfg, client.Options{Scheme: scheme})
+	if err != nil {
+		log.Error(err, "Failed to create controller-runtime client")
+		return nil
+	}
+
+	selector := labels.Set{"app": "secretsynchronizer"}.AsSelector()
+
+	syncList := &synchronizerv1alpha1.SecretSynchronizerList{}
+	if err := crtClient.List(ctx, syncList, client.MatchingLabelsSelector{Selector: selector}); err != nil {
+		if !errors.IsNotFound(err) {
+			log.Error(err, "Failed to list SecretSynchronizer objects")
+			return nil
+		}
+	}
+
+	if len(syncList.Items) > 0 {
+		return &syncList.Items[0]
+	} else {
+		return nil
+	}
+}
+
+func (r *SecretSynchronizerReconciler) CreateArgoCDSecret(ctx context.Context, argoSecret *corev1.Secret, secret *corev1.Secret, kubeconf kops.KubectlConfig, synchronizer *synchronizerv1alpha1.SecretSynchronizer) error {
 	var argoTlsConfig ArgoTlsConfig
 	argoTlsConfig.Insecure = false
 	argoTlsConfig.CaData = argoSecret.Data["ca.crt"]
@@ -246,25 +344,48 @@ func (r *SecretSynchronizerReconciler) CreateArgoCDSecret(ctx context.Context, a
 	argoConfig.BearerToken = string(argoSecret.Data["token"])
 	argoConfig.TlsClientConfig = argoTlsConfig
 
-	argoConfigAsJson, _ := json.Marshal(argoConfig)
+	var secretName string = secret.Name + "-argocd"
 
-	err := r.Create(ctx, &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secret.Name + "-argocd",
-			Namespace: "argocd",
-			Labels: map[string]string{
-				"argocd.argoproj.io/secret-type": "cluster",
-				"argocdsecretsynchronizer":       secret.Name,
+	cfg, err := rest.InClusterConfig()
+	if err != nil {
+		log.Error(err, "Failed to get Kubernetes config")
+		return nil
+	}
+
+	clientset, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	argoConfigAsJson, _ := json.Marshal(argoConfig)
+	existingSecret, err := clientset.CoreV1().Secrets(synchronizer.Spec.ArgoCDNamespace).Get(context.Background(), secretName, metav1.GetOptions{})
+	if errors.IsNotFound(err) {
+		err := r.Create(ctx, &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      secretName,
+				Namespace: synchronizer.Spec.ArgoCDNamespace,
+				Labels: map[string]string{
+					"argocd.argoproj.io/secret-type": "cluster",
+					"argocdsecretsynchronizer":       secret.Name,
+				},
 			},
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			"name":   []byte(kubeconf.Clusters[0].Name),
-			"server": []byte(kubeconf.Clusters[0].Cluster.Server),
-			"config": argoConfigAsJson,
-		},
-	})
-	return err
+			Type: corev1.SecretTypeOpaque,
+			Data: map[string][]byte{
+				"name":   []byte(kubeconf.Clusters[0].Name),
+				"server": []byte(kubeconf.Clusters[0].Cluster.Server),
+				"config": argoConfigAsJson,
+			},
+		})
+		log.Info("Argo CD Secret Created Successfully")
+		return err
+	} else {
+		existingSecret.Data["config"] = argoConfigAsJson
+		existingSecret.Data["name"] = []byte(kubeconf.Clusters[0].Name)
+		existingSecret.Data["server"] = []byte(kubeconf.Clusters[0].Cluster.Server)
+		_, err = clientset.CoreV1().Secrets(synchronizer.Spec.ArgoCDNamespace).Update(context.Background(), existingSecret, metav1.UpdateOptions{})
+		log.Info("Argo CD Secret Is Already Created, Updating It")
+		return err
+	}
 }
 
 func (r *SecretSynchronizerReconciler) DeleteIrrelevantSecrets(ctx context.Context) (ctrl.Result, error) {
@@ -299,89 +420,95 @@ func (r *SecretSynchronizerReconciler) DeleteIrrelevantSecrets(ctx context.Conte
 func CreateServiceAccountWithToken(ctx context.Context, clientset kubernetes.Interface, namespace string, name string) (*corev1.Secret, error) {
 	log := ctrllog.FromContext(ctx)
 	var err error
-	clusterRole := rbacv1.ClusterRole{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "rbac.authorization.k8s.io/v1",
-			Kind:       "ClusterRole",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name + "role",
-		},
-		Rules: ManagementClusterPolicyRules,
-	}
-	_, err = clientset.RbacV1().ClusterRoles().Create(context.Background(), &clusterRole, metav1.CreateOptions{})
-	if err != nil {
-		if !strings.Contains(err.Error(), "already exists") {
-			return nil, err
-		}
-	}
 
-	roleBinding := rbacv1.ClusterRoleBinding{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "rbac.authorization.k8s.io/v1",
-			Kind:       "ClusterRoleBinding",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name + "rolebinding",
-		},
-		RoleRef: rbacv1.RoleRef{
-			APIGroup: "rbac.authorization.k8s.io",
-			Kind:     "ClusterRole",
-			Name:     name + "role",
-		},
-		Subjects: []rbacv1.Subject{rbacv1.Subject{
-			Kind:      rbacv1.ServiceAccountKind,
-			Name:      name,
-			Namespace: namespace,
-		}},
-	}
-
-	_, err = clientset.RbacV1().ClusterRoleBindings().Create(context.Background(), &roleBinding, metav1.CreateOptions{})
-	if err != nil {
-		if !strings.Contains(err.Error(), "already exists") {
-			return nil, err
-		}
-	}
-
-	serviceAccount := corev1.ServiceAccount{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "ServiceAccount",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-	}
-	_, err = clientset.CoreV1().ServiceAccounts(namespace).Create(context.Background(), &serviceAccount, metav1.CreateOptions{})
-	if err != nil {
-		if !strings.Contains(err.Error(), "already exists") {
-			return nil, err
-		}
-	}
-
-	serviceAccountCreated, _ := clientset.CoreV1().ServiceAccounts(namespace).Get(context.Background(), name, metav1.GetOptions{})
-	log.Info("Service Account Created", "Service Account", serviceAccountCreated)
-
-	if serviceAccountCreated.Secrets == nil {
-		secretToCreate := corev1.Secret{
+	_, err = clientset.RbacV1().ClusterRoles().Get(context.Background(), name+"role", metav1.GetOptions{})
+	if errors.IsNotFound(err) {
+		clusterRole := rbacv1.ClusterRole{
 			TypeMeta: metav1.TypeMeta{
-				APIVersion: "v1",
-				Kind:       "Secret",
+				APIVersion: "rbac.authorization.k8s.io/v1",
+				Kind:       "ClusterRole",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name:        name,
-				Namespace:   namespace,
-				Annotations: map[string]string{"kubernetes.io/service-account.name": serviceAccountCreated.Name},
+				Name: name + "role",
 			},
-			Type: corev1.SecretTypeServiceAccountToken,
+			Rules: ManagementClusterPolicyRules,
 		}
-
-		secret, err := clientset.CoreV1().Secrets(namespace).Create(context.Background(), &secretToCreate, metav1.CreateOptions{})
-
+		_, err = clientset.RbacV1().ClusterRoles().Create(context.Background(), &clusterRole, metav1.CreateOptions{})
 		if err != nil {
-			log.Error(err, "An error occurred while creating secret")
+			log.Info("An Error Occured While Creating ClusterRole", "error", err)
 			return nil, err
+		}
+	}
+
+	_, err = clientset.RbacV1().ClusterRoleBindings().Get(context.Background(), name+"rolebinding", metav1.GetOptions{})
+	if errors.IsNotFound(err) {
+		roleBinding := rbacv1.ClusterRoleBinding{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "rbac.authorization.k8s.io/v1",
+				Kind:       "ClusterRoleBinding",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: name + "rolebinding",
+			},
+			RoleRef: rbacv1.RoleRef{
+				APIGroup: "rbac.authorization.k8s.io",
+				Kind:     "ClusterRole",
+				Name:     name + "role",
+			},
+			Subjects: []rbacv1.Subject{rbacv1.Subject{
+				Kind:      rbacv1.ServiceAccountKind,
+				Name:      name,
+				Namespace: namespace,
+			}},
+		}
+		_, err = clientset.RbacV1().ClusterRoleBindings().Create(context.Background(), &roleBinding, metav1.CreateOptions{})
+		if err != nil {
+			log.Info("An Error Occured While Creating ClusterRoleBinding", "error", err)
+			return nil, err
+		}
+	}
+
+	serviceAccountCreated, err := clientset.CoreV1().ServiceAccounts(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	if errors.IsNotFound(err) {
+		serviceAccount := corev1.ServiceAccount{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "v1",
+				Kind:       "ServiceAccount",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: namespace,
+			},
+		}
+		serviceAccountCreated, err = clientset.CoreV1().ServiceAccounts(namespace).Create(context.Background(), &serviceAccount, metav1.CreateOptions{})
+		if err != nil {
+			log.Info("An Error Occured While Creating Service Account", "error", err)
+			return nil, err
+		}
+		log.Info("Service Account Created", "Service Account", serviceAccountCreated)
+	}
+
+	if serviceAccountCreated.Secrets == nil {
+		secret, err := clientset.CoreV1().Secrets(namespace).Get(context.Background(), name, metav1.GetOptions{})
+		if errors.IsNotFound(err) {
+			secretToCreate := corev1.Secret{
+				TypeMeta: metav1.TypeMeta{
+					APIVersion: "v1",
+					Kind:       "Secret",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:        name,
+					Namespace:   namespace,
+					Annotations: map[string]string{"kubernetes.io/service-account.name": serviceAccountCreated.Name},
+				},
+				Type: corev1.SecretTypeServiceAccountToken,
+			}
+			secret, err = clientset.CoreV1().Secrets(namespace).Create(context.Background(), &secretToCreate, metav1.CreateOptions{})
+
+			if err != nil {
+				log.Error(err, "An error occurred while creating secret", "secret", secretToCreate)
+				return nil, err
+			}
 		}
 		return secret, nil
 	}

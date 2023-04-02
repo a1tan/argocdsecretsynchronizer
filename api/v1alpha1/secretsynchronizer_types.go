@@ -32,6 +32,8 @@ type SecretSynchronizerSpec struct {
 	// Foo string `json:"foo,omitempty"`
 	Size  int32 `json:"size"`
 	Prune bool  `json:"prune"`
+	// +kubebuilder:default="argocd"
+	ArgoCDNamespace string `json:"argocd-namespace,omitempty"`
 }
 
 // SecretSynchronizerStatus defines the observed state of SecretSynchronizer
