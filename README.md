@@ -10,7 +10,7 @@ This operator does a simple thing:
 These cluster managers are:
 * Crossplane
 * VCluster
-* Cluster API(Not tested yet)
+* Cluster API
 * Azure Service Operator(Not tested yet)
 
 ## Installation
